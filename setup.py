@@ -2,11 +2,15 @@ from setuptools import setup, find_packages
 
 setup(
     name="linkmod",
-    version="0.1",
+    version="0.2",
     packages=find_packages(),
+    install_requires=[
+        'requests',
+        'keyring',
+    ],
     entry_points={
         'console_scripts': [
-            'linkMod=linkmod.linkmod:create_custom_link',
+            'linkMod=linkmod.linkmod:main',
         ],
     },
     author="Rishi Bhati",

@@ -1,20 +1,94 @@
 import sys
+import requests
+import keyring
 
-def create_custom_link():
-    if len(sys.argv) != 3:
-        print("Usage: linkMod {link} {custom_link}")
+# Constants
+BITLY_API_URL = "https://api-ssl.bitly.com/v4/shorten"
+SERVICE_ID = "linkmod"
+
+def get_api_key():
+    """Retrieves the Bitly API key from the system's keyring."""
+    return keyring.get_password(SERVICE_ID, "bitly_api_key")
+
+def set_api_key(api_key):
+    """Saves the Bitly API key to the system's keyring."""
+    keyring.set_password(SERVICE_ID, "bitly_api_key", api_key)
+
+def shorten_link(api_key, long_url):
+    """Shortens a URL using the Bitly API."""
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "long_url": long_url,
+    }
+    response = requests.post(BITLY_API_URL, headers=headers, json=payload)
+    if response.status_code in [200, 201]:
+        return response.json().get("link")
+    else:
+        return f"Error: {response.status_code} - {response.text}"
+
+def main():
+    """Main function for the linkMod tool."""
+    # Handle combined shortening and custom link creation
+    if len(sys.argv) == 3:
+        long_url = sys.argv[1]
+        custom_name = sys.argv[2]
+        
+        print("Checking for Bitly API key...")
+        api_key = get_api_key()
+        
+        link_to_use = long_url
+        
+        if api_key:
+            print("Bitly API key found. Shortening link...")
+            shortened_link = shorten_link(api_key, long_url)
+            if shortened_link and not shortened_link.startswith("Error:"):
+                link_to_use = shortened_link
+                print("Link shortened successfully.")
+            else:
+                print(f"Could not shorten link: {shortened_link}")
+                print("Using original link for custom name.")
+        else:
+            print("Bitly API key not found. Using original link.")
+
+        # Remove 'https://' if present from the link we are actually using
+        if link_to_use.startswith("https://"):
+            link_to_use = link_to_use[8:]
+        
+        # Combine the custom link and original/shortened link
+        final_link = custom_name + "@" + link_to_use
+        print(final_link)
         return
 
-    raw = sys.argv[1]
-    usr = sys.argv[2]
+    # Handle Bitly URL shortening only
+    if len(sys.argv) == 2:
+        long_url = sys.argv[1]
+        api_key = get_api_key()
 
-    # Remove 'https://' if present
-    if raw.startswith("https://"):
-        raw = raw[8:]
+        # Prompt to add a key if one is not found
+        if not api_key:
+            choice = input("Bitly API key not found. Would you like to add one? (y/n): ").lower()
+            if choice == 'y':
+                new_api_key = input("Please enter your Bitly API key: ")
+                if new_api_key:
+                    set_api_key(new_api_key)
+                    api_key = new_api_key  # Use the new key for the current session
+                    print("API key saved successfully.")
 
-    # Combine the custom link and original link
-    link = usr + "@" + raw
-    print(link)
+        if api_key:
+            short_link = shorten_link(api_key, long_url)
+            print(f"Short link: {short_link}")
+        else:
+            print("No Bitly API key found. Returning original link.")
+            print(f"Original link: {long_url}")
+        return
+
+    # If argument count is incorrect, show usage
+    print("Usage:")
+    print("  To shorten a URL: linkMod {long_url}")
+    print("  To create a custom link (and shorten if possible): linkMod {link} {custom_name}")
 
 if __name__ == "__main__":
-    create_custom_link()
+    main()

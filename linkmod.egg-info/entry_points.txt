@@ -1,2 +1,2 @@
 [console_scripts]
-linkMod = linkmod.linkmod:create_custom_link
+linkMod = linkmod.linkmod:main

@@ -6,4 +6,5 @@ linkmod.egg-info/PKG-INFO
 linkmod.egg-info/SOURCES.txt
 linkmod.egg-info/dependency_links.txt
 linkmod.egg-info/entry_points.txt
+linkmod.egg-info/requires.txt
 linkmod.egg-info/top_level.txt
