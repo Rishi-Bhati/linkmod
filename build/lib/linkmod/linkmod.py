@@ -23,14 +23,31 @@ def shorten_link(api_key, long_url):
     payload = {
         "long_url": long_url,
     }
-    response = requests.post(BITLY_API_URL, headers=headers, json=payload)
-    if response.status_code in [200, 201]:
-        return response.json().get("link")
-    else:
-        return f"Error: {response.status_code} - {response.text}"
+    try:
+        response = requests.post(BITLY_API_URL, headers=headers, json=payload, timeout=10)
+        if response.status_code in [200, 201]:
+            return response.json().get("link")
+        else:
+            return f"Error: {response.status_code} - {response.text}"
+    except requests.exceptions.ConnectionError:
+        return "Error: Connection failed - Unable to reach Bitly API"
+    except requests.exceptions.Timeout:
+        return "Error: Request timed out - Bitly API is not responding"
+    except requests.exceptions.RequestException as e:
+        return f"Error: Network error - {str(e)}"
 
 def main():
     """Main function for the linkMod tool."""
+    # Handle setting the API key
+    if len(sys.argv) == 2 and sys.argv[1] == '--set-key':
+        new_api_key = input("Please enter your Bitly API key: ")
+        if new_api_key:
+            set_api_key(new_api_key)
+            print("Bitly API key saved successfully.")
+        else:
+            print("No API key entered.")
+        return
+
     # Handle combined shortening and custom link creation
     if len(sys.argv) == 3:
         long_url = sys.argv[1]
@@ -51,7 +68,7 @@ def main():
                 print(f"Could not shorten link: {shortened_link}")
                 print("Using original link for custom name.")
         else:
-            print("Bitly API key not found. Using original link.")
+            print("Bitly API key not found. Use 'linkMod --set-key' to add one.")
 
         # Remove 'https://' if present from the link we are actually using
         if link_to_use.startswith("https://"):
@@ -79,7 +96,11 @@ def main():
 
         if api_key:
             short_link = shorten_link(api_key, long_url)
-            print(f"Short link: {short_link}")
+            if short_link.startswith("Error:"):
+                print(f"Could not shorten link: {short_link}")
+                print(f"Original link: {long_url}")
+            else:
+                print(f"Short link: {short_link}")
         else:
             print("No Bitly API key found. Returning original link.")
             print(f"Original link: {long_url}")
@@ -89,6 +110,7 @@ def main():
     print("Usage:")
     print("  To shorten a URL: linkMod {long_url}")
     print("  To create a custom link (and shorten if possible): linkMod {link} {custom_name}")
+    print("  To set/update your Bitly API key: linkMod --set-key")
 
 if __name__ == "__main__":
     main()

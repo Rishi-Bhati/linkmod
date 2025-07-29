@@ -82,15 +82,66 @@ Bitly API key not found. Using original link.
 my-repo@www.github.com/Rishi-Bhati/linkmod
 ```
 
-### Setting Up Your Bitly API Key
+### 3. Set/Update Your Bitly API Key
 
-The first time you use a feature that requires a Bitly API key, the tool will prompt you to add one:
+You can add or update your Bitly API key at any time using the `--set-key` flag:
 
+```bash
+linkMod --set-key
 ```
-Bitly API key not found. Would you like to add one? (y/n):
+
+The tool will then prompt you to enter your new API key.
+
+## 🔧 Setup Notes (if `linkMod` command is not found)
+
+If you installed the package but `linkMod` is not recognized as a command, try the following:
+
+### On Linux/macOS:
+Ensure `~/.local/bin` is in your PATH:
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
 ```
 
-If you select `y`, you will be prompted to enter your API key. It will then be securely stored for all future uses.
+Or run this for the current terminal session:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+### On Windows:
+
+Ensure the following folder is in your system PATH:
+
+`C:\Users\<YourUsername>\AppData\Roaming\Python\Python3X\Scripts`
+
+Or wherever Python installs your packages.
+
+You may need to restart the terminal or system after adding to PATH.
+
+---
+
+### 2. ✅ Optional: Add a `post_install` Script (Advanced)
+
+Python packaging **does not officially support** automatic post-install hooks (like modifying `PATH`) due to security and portability reasons. So this isn't a reliable method, especially for PyPI packages.
+
+Instead, documentation is the correct and clean way.
+
+---
+
+### 3. ✅ Use a Desktop Shortcut or `.bat` File (Windows Only)
+
+For users on Windows:
+- You can suggest creating a simple `.bat` file in a folder already in `PATH`.
+  
+**Example `linkMod.bat`:**
+```bat
+@echo off
+python -m linkmod.linkmod %*
+```
+
+Place this in `C:\Windows\` or any folder in `PATH`.
 
 ## Contributing
 
