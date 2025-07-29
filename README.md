@@ -19,13 +19,34 @@ When you provide a long URL and a custom name, LinkMod will first shorten the UR
 
 ## Installation
 
-You can install LinkMod using `pip`:
+LinkMod is available on PyPI and can be installed with `pip`.
+
+### Recommended: In a Virtual Environment
+
+The safest way to install `linkmod` is within a Python virtual environment:
 
 ```bash
-pip install .
+# Create and activate a virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+
+# Install linkmod
+pip install linkmod
 ```
 
-This will install the package and all its dependencies (`requests` and `keyring`).
+### System-Wide Installation (Advanced)
+
+If you prefer to install `linkmod` system-wide, you can do so, but be aware that this may interfere with system packages on some Linux distributions.
+
+```bash
+pip install linkmod
+```
+
+On some systems, you may need to use the `--break-system-packages` flag:
+
+```bash
+pip install linkmod --break-system-packages
+```
 
 ## Usage
 
